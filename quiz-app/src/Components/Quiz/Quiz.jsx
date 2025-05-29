@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
-import './Quiz.css';
-import { data } from '../../assets/data';
+import React, { useRef, useState } from "react";
+import "./Quiz.css";
+import { data } from "../../assets/data";
 
 const Quiz = () => {
   const [index, setIndex] = useState(0);
@@ -9,7 +9,7 @@ const Quiz = () => {
   const [score, setScore] = useState(0);
   const [result, setResult] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const [isStarted, setIsStarted] = useState(false);
 
   const Option1 = useRef(null);
@@ -24,11 +24,11 @@ const Quiz = () => {
       data[index].selected = ans;
 
       if (question.ans === ans) {
-        e.target.classList.add('correct');
+        e.target.classList.add("correct");
         setScore((prev) => prev + 1);
       } else {
-        e.target.classList.add('wrong');
-        option_array[question.ans - 1].current.classList.add('correct');
+        e.target.classList.add("wrong");
+        option_array[question.ans - 1].current.classList.add("correct");
       }
 
       setLock(true);
@@ -39,7 +39,23 @@ const Quiz = () => {
     if (lock) {
       if (index === data.length - 1) {
         setResult(true);
-        return;
+        // Submit score to backend
+        fetch("http://localhost:5000/api/score/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userName, score }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("Score submitted:", data);
+          })
+          .catch((err) => {
+            console.error("Error submitting score:", err);
+          });
+
+        return 0;
       }
 
       setIndex(index + 1);
@@ -47,8 +63,8 @@ const Quiz = () => {
       setLock(false);
 
       option_array.forEach((option) => {
-        option.current.classList.remove('wrong');
-        option.current.classList.remove('correct');
+        option.current.classList.remove("wrong");
+        option.current.classList.remove("correct");
       });
     }
   };
@@ -61,12 +77,12 @@ const Quiz = () => {
     setResult(false);
     setReviewMode(false);
     setIsStarted(false);
-    setUserName('');
+    setUserName("");
     data.forEach((q) => (q.selected = null)); // clear previous answers
   };
 
   return (
-    <div className='container'>
+    <div className="container">
       <h1>Quiz App</h1>
       <hr />
 
@@ -74,15 +90,15 @@ const Quiz = () => {
         <>
           <h2>Welcome! Please enter your name to start the quiz.</h2>
           <input
-            type='text'
-            placeholder='Enter your name'
+            type="text"
+            placeholder="Enter your name"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
           />
           <button
             onClick={() => {
               if (userName.trim()) setIsStarted(true);
-              else alert('Please enter your name.');
+              else alert("Please enter your name.");
             }}
           >
             Start Quiz
@@ -93,16 +109,47 @@ const Quiz = () => {
           <>
             <h2>Review Answers</h2>
             {data.map((q, idx) => (
-              <div key={idx} className='review-question'>
-                <h3>{idx + 1}. {q.question}</h3>
+              <div key={idx} className="review-question">
+                <h3>
+                  {idx + 1}. {q.question}
+                </h3>
                 <ul>
-                  <li className={q.ans === 1 ? 'correct' : q.selected === 1 ? 'wrong' : ''}>{q.option1}</li>
-                  <li className={q.ans === 2 ? 'correct' : q.selected === 2 ? 'wrong' : ''}>{q.option2}</li>
-                  <li className={q.ans === 3 ? 'correct' : q.selected === 3 ? 'wrong' : ''}>{q.option3}</li>
-                  <li className={q.ans === 4 ? 'correct' : q.selected === 4 ? 'wrong' : ''}>{q.option4}</li>
+                  <li
+                    className={
+                      q.ans === 1 ? "correct" : q.selected === 1 ? "wrong" : ""
+                    }
+                  >
+                    {q.option1}
+                  </li>
+                  <li
+                    className={
+                      q.ans === 2 ? "correct" : q.selected === 2 ? "wrong" : ""
+                    }
+                  >
+                    {q.option2}
+                  </li>
+                  <li
+                    className={
+                      q.ans === 3 ? "correct" : q.selected === 3 ? "wrong" : ""
+                    }
+                  >
+                    {q.option3}
+                  </li>
+                  <li
+                    className={
+                      q.ans === 4 ? "correct" : q.selected === 4 ? "wrong" : ""
+                    }
+                  >
+                    {q.option4}
+                  </li>
                 </ul>
-                <p><strong>Your answer:</strong> {q[`option${q.selected}`] || "Not Answered"}</p>
-                <p><strong>Correct answer:</strong> {q[`option${q.ans}`]}</p>
+                <p>
+                  <strong>Your answer:</strong>{" "}
+                  {q[`option${q.selected}`] || "Not Answered"}
+                </p>
+                <p>
+                  <strong>Correct answer:</strong> {q[`option${q.ans}`]}
+                </p>
                 <hr />
               </div>
             ))}
@@ -110,22 +157,36 @@ const Quiz = () => {
           </>
         ) : (
           <>
-            <h2>Hi {userName}! You scored {score} out of {data.length} 🎉</h2>
+            <h2>
+              Hi {userName}! You scored {score} out of {data.length} 🎉
+            </h2>
             <button onClick={reset}>Play Again</button>
             <button onClick={() => setReviewMode(true)}>Review Answers</button>
           </>
         )
       ) : (
         <>
-          <h2>{index + 1}. {question.question}</h2>
+          <h2>
+            {index + 1}. {question.question}
+          </h2>
           <ul>
-            <li ref={Option1} onClick={(e) => checkAns(e, 1)}>{question.option1}</li>
-            <li ref={Option2} onClick={(e) => checkAns(e, 2)}>{question.option2}</li>
-            <li ref={Option3} onClick={(e) => checkAns(e, 3)}>{question.option3}</li>
-            <li ref={Option4} onClick={(e) => checkAns(e, 4)}>{question.option4}</li>
+            <li ref={Option1} onClick={(e) => checkAns(e, 1)}>
+              {question.option1}
+            </li>
+            <li ref={Option2} onClick={(e) => checkAns(e, 2)}>
+              {question.option2}
+            </li>
+            <li ref={Option3} onClick={(e) => checkAns(e, 3)}>
+              {question.option3}
+            </li>
+            <li ref={Option4} onClick={(e) => checkAns(e, 4)}>
+              {question.option4}
+            </li>
           </ul>
           <button onClick={next}>Next</button>
-          <div className='index'>{index + 1} of {data.length} questions</div>
+          <div className="index">
+            {index + 1} of {data.length} questions
+          </div>
         </>
       )}
     </div>
