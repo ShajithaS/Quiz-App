@@ -7,6 +7,8 @@ const Quiz = () => {
     let [lock,setLock]=useState(false);
     let [score,setScore]=useState(0);
     let [result,setResult]=useState(false);
+    let [reviewMode, setReviewMode] = useState(false);
+
 
     let Option1=useRef(null);
     let Option2=useRef(null);
@@ -27,6 +29,7 @@ const Quiz = () => {
           setLock(true);
           option_array[question.ans-1].current.classList.add("correct");
         }     
+        data[index].selected = ans;
       }  
     }
 
@@ -57,22 +60,46 @@ const Quiz = () => {
     <div className='container'>
       <h1>Quiz App</h1>
       <hr></hr>
-      {result?<>
-      <h2>You scored {score} out of {data.length}
-      </h2>
-      <button onClick={reset}>Reset</button>
-      </>:
+      {result ? (
+      reviewMode ? (
+        <>
+          <h2>Review Answers</h2>
+          {data.map((q, idx) => (
+            <div key={idx} className="review-question">
+              <h3>{idx + 1}. {q.question}</h3>
+              <ul>
+                <li className={q.ans === 1 ? "correct" : q.selected === 1 ? "wrong" : ""}>{q.option1}</li>
+                <li className={q.ans === 2 ? "correct" : q.selected === 2 ? "wrong" : ""}>{q.option2}</li>
+                <li className={q.ans === 3 ? "correct" : q.selected === 3 ? "wrong" : ""}>{q.option3}</li>
+                <li className={q.ans === 4 ? "correct" : q.selected === 4 ? "wrong" : ""}>{q.option4}</li>
+              </ul>
+              <p><strong>Your answer:</strong> {q[`option${q.selected}`] || "Not Answered"}</p>
+              <p><strong>Correct answer:</strong> {q[`option${q.ans}`]}</p>
+              <hr />
+            </div>
+          ))}
+          <button onClick={reset}>Play Again</button>
+        </>
+      ) : (
+        <>
+          <h2>You scored {score} out of {data.length}</h2>
+          <button onClick={reset}>Reset</button>
+          <button onClick={() => setReviewMode(true)}>Review Answers</button>
+        </>
+      )
+    ) : (
       <>
-      <h2>{index+1}. {question.question}</h2>
-      <ul>
-        <li ref={Option1} onClick={(e)=>{checkAns(e,1)}}>{question.option1} </li>
-        <li ref={Option2} onClick={(e)=>{checkAns(e,2)}}>{question.option2} </li>
-        <li ref={Option3} onClick={(e)=>{checkAns(e,3)}}>{question.option3} </li>
-        <li ref={Option4} onClick={(e)=>{checkAns(e,4)}}>{question.option4} </li>
-      </ul>
-      <button onClick={next}>Next</button>
-      <div className='index'>{index+1} of {data.length} questions</div> 
-      </>}
+        <h2>{index + 1}. {question.question}</h2>
+        <ul>
+          <li ref={Option1} onClick={(e) => checkAns(e, 1)}>{question.option1}</li>
+          <li ref={Option2} onClick={(e) => checkAns(e, 2)}>{question.option2}</li>
+          <li ref={Option3} onClick={(e) => checkAns(e, 3)}>{question.option3}</li>
+          <li ref={Option4} onClick={(e) => checkAns(e, 4)}>{question.option4}</li>
+        </ul>
+        <button onClick={next}>Next</button>
+        <div className='index'>{index + 1} of {data.length} questions</div>
+      </>
+    )}
       
     </div>
   ) 
