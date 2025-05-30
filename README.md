@@ -27,5 +27,5 @@ An interactive web-based quiz application that allows users to answer multiple-c
 - **Database:** MongoDB Atlas
 - **Deployment:** Vercel (frontend), Render (backend) 
 
---
+---
 
