@@ -40,7 +40,7 @@ const Quiz = () => {
       if (index === data.length - 1) {
         setResult(true);
         // Submit score to backend
-        fetch("http://localhost:5000/api/score/submit", {
+        fetch("https://quiz-app-z4k6.onrender.com/api/score/submit", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
